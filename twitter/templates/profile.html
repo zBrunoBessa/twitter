@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 
 {% if profile %}
@@ -11,19 +11,41 @@
                 <br/>
                 {% if tweets %}
                     {% for tweet in tweets %}
-                    <div class="alert alert-dark" role="alert">
+                    
+			<div class="alert alert-dark" role="alert">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-1">
+                            {% if profile.profile_image %}
+                            <img src="{{ profile.profile_image.url }}" width=50 height=50 class="rounded-circle" alt="{{ profile.user.username }}">
+            
+                            {% else %}
+                            <img src="{% static 'images/default_profile_pic.png' %}" width=50 height=50 class="rounded-circle" alt="{{ profile.user.username }}">	
+                            {% endif %}
+            
+            
+                        </div>
+            
+                        <div class="col-11">
                         {{ tweet.body }}<br/>
                         <small class="text-muted">
                             ({{ tweet.created_at }}) By 
                             @{{ tweet.user.username }}
                         </small>
-                    </div>
+                        </div>
                     <br/><br/>
+                    </div>
+                </div>
+            </div>
                     {% endfor %}
                 {% endif %}
             </div>
             <div class="col-4">
                 <br/><br/><br/>
+                {% if profile.profile_image %}
+                <img src="{{ profile.profile_image.url }}" style="width: 200px;"  class="rounded-circle">
+				    <br/><br/>
+				{% endif %}
                 <div class="card">
                     <div class="card-header">
                       Follows
@@ -59,6 +81,10 @@
     {% endif %}
 </form>
 <br />
+
+    {% if request.user.id == profile.user.id %}
+		<a href="{% url 'update_user' %}" class="btn btn-outline-secondary">Update Profile</a>
+	{% endif %}
                 
             </div>
         </div>

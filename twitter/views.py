@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Profile, Tweet
-from .forms import TweetForm, SignUpForm
+from .forms import TweetForm, SignUpForm, ProfilePicForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
+from django.contrib.auth.models import User
+
 
 # Create your views here.
 def home(request):
@@ -85,3 +87,25 @@ def register_user(request):
 			return redirect('home')
 
 	return render(request, "register.html", {'form':form})
+
+
+def update_user(request):
+    if request.user.is_authenticated:
+        current_user = User.objects.get(id=request.user.id)
+        profile_user = Profile.objects.get(user__id=request.user.id)
+        # Get Forms
+        user_form = SignUpForm(request.POST or None, request.FILES or None, instance=current_user, user_id=current_user.id)
+        profile_form = ProfilePicForm(request.POST or None, request.FILES or None, instance=profile_user)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+
+            login(request, current_user)
+            messages.success(request, ("Your Profile Has Been Updated!"))
+            return redirect('home')
+
+        return render(request, "update_user.html", {'user_form': user_form, 'profile_form': profile_form})
+    else:
+        messages.success(request, ("You Must Be Logged In To View That Page..."))
+        return redirect('home')
