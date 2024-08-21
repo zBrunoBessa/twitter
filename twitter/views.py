@@ -201,3 +201,61 @@ def follows(request, pk):
 	else:
 		messages.success(request, ("You Must Be Logged In To View This Page..."))
 		return redirect('home')
+
+def delete_tweet(request, pk):
+	if request.user.is_authenticated:
+		tweet = get_object_or_404(Tweet, id=pk)
+            
+		if request.user.username == tweet.user.username:
+			tweet.delete()
+
+			messages.success(request, ("The Tweet Has Been Deleted!"))
+			return redirect(request.META.get("HTTP_REFERER"))	
+		else:
+			messages.success(request, ("You Don't Own That Tweet!!"))
+			return redirect('home')
+
+	else:
+		messages.success(request, ("Please Log In To Continue..."))
+		return redirect(request.META.get("HTTP_REFERER"))
+      
+def edit_tweet(request,pk):
+	if request.user.is_authenticated:
+		tweet = get_object_or_404(Tweet, id=pk)
+
+		if request.user.username == tweet.user.username:
+
+			form = TweetForm(request.POST or None, instance=tweet)
+			if request.method == "POST":
+				if form.is_valid():
+					tweet = form.save(commit=False)
+					tweet.user = request.user
+					tweet.save()
+					messages.success(request, ("Your tweet Has Been Updated!"))
+					return redirect('home')
+			else:
+				return render(request, "edit_tweet.html", {'form':form, 'tweet':tweet})
+
+		else:
+			messages.success(request, ("You Don't Own That tweet!!"))
+			return redirect('home')
+
+	else:
+		messages.success(request, ("Please Log In To Continue..."))
+		return redirect('home')
+      
+def search(request):
+	if request.method == "POST":
+		search = request.POST['search']
+		searched = Tweet.objects.filter(body__contains = search)
+		return render(request, 'search.html', {'search':search, 'searched':searched})
+	else:
+		return render(request, 'search.html', {})
+      
+def search_user(request):
+	if request.method == "POST":
+		search = request.POST['search']
+		searched = User.objects.filter(username__contains = search)
+		return render(request, 'search_user.html', {'search':search, 'searched':searched})
+	else:
+		return render(request, 'search_user.html', {})
