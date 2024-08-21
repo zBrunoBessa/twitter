@@ -150,3 +150,54 @@ def tweet_show(request, pk):
     else:
         messages.success(request, ("That tweet Does Not Exist..."))
         return redirect("home")
+    
+    
+def unfollow(request, pk):
+	if request.user.is_authenticated:
+		profile = Profile.objects.get(user_id=pk)
+		request.user.profile.follows.remove(profile)
+		request.user.profile.save()
+
+		messages.success(request, (f"You Have Successfully Unfollowed {profile.user.username}"))
+		return redirect(request.META.get("HTTP_REFERER"))
+
+	else:
+		messages.success(request, ("You Must Be Logged In To View This Page..."))
+		return redirect('home')
+     
+def follow(request, pk):
+	if request.user.is_authenticated:
+		profile = Profile.objects.get(user_id=pk)
+		request.user.profile.follows.add(profile)
+		request.user.profile.save()
+
+		messages.success(request, (f"You Have Successfully Followed {profile.user.username}"))
+		return redirect(request.META.get("HTTP_REFERER"))
+
+	else:
+		messages.success(request, ("You Must Be Logged In To View This Page..."))
+		return redirect('home')
+
+def followers(request, pk):
+	if request.user.is_authenticated:
+		if request.user.id == pk:
+			profiles = Profile.objects.get(user_id=pk)
+			return render(request, 'followers.html', {"profiles":profiles})
+		else:
+			messages.success(request, ("That's Not Your Profile Page..."))
+			return redirect('home')	
+	else:
+		messages.success(request, ("You Must Be Logged In To View This Page..."))
+		return redirect('home')
+     
+def follows(request, pk):
+	if request.user.is_authenticated:
+		if request.user.id == pk:
+			profiles = Profile.objects.get(user_id=pk)
+			return render(request, 'follows.html', {"profiles":profiles})
+		else:
+			messages.success(request, ("That's Not Your Profile Page..."))
+			return redirect('home')	
+	else:
+		messages.success(request, ("You Must Be Logged In To View This Page..."))
+		return redirect('home')
