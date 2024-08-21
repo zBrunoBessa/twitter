@@ -5,6 +5,7 @@ from .models import Profile, Tweet
 
 admin.site.unregister(Group)
 
+
 class ProfileInline(admin.StackedInline):
     model = Profile
 
@@ -15,9 +16,9 @@ class UserAdmin(admin.ModelAdmin):
     fields = ["username"]
     inlines = [ProfileInline]
 
+
 admin.site.unregister(User)
 
 admin.site.register(User, UserAdmin)
 
 admin.site.register(Tweet)
-
